@@ -94,13 +94,13 @@ pub fn main() anyerror!void {
     std.debug.warn("Zig brainfuck interpreter.\n");
 
     const prog = "+[,.]"; // cat
-    var mem = []u8{0} ** 1024;
+    var mem = [_]u8{0} ** 1024;
     try bf(prog, mem[0..]);
 }
 
 test "all instructions once -> no crash" {
     const prog = "+-><.,[]";
-    var mem = []u8{0} ** 1024;
+    var mem = [_]u8{0} ** 1024;
     try bf(prog, mem[0..]);
 }
 
@@ -111,8 +111,8 @@ test "add" {
         count -= 1;
         std.debug.warn("{}.", count);
 
-        const prog = []u8{'+'} ** count;
-        var mem = []u8{0} ** 1;
+        const prog = [_]u8{'+'} ** count;
+        var mem = [_]u8{0} ** 1;
         try bf(prog, &mem);
 
         assert(mem[0] == count);
@@ -127,8 +127,8 @@ test "sub" {
         count -= 1;
         std.debug.warn("{}.", count);
 
-        const prog = []u8{'-'} ** count;
-        var mem = []u8{0} ** 1;
+        const prog = [_]u8{'-'} ** count;
+        var mem = [_]u8{0} ** 1;
         try bf(prog, &mem);
 
         assert(mem[0] == 256 - count);
@@ -138,8 +138,8 @@ test "sub" {
 
 test "add ** 256 = 0" {
     comptime const count: usize = 256;
-    const prog = []u8{'+'} ** count;
-    var mem = []u8{0} ** 1;
+    const prog = [_]u8{'+'} ** count;
+    var mem = [_]u8{0} ** 1;
 
     try bf(prog, &mem);
 
@@ -148,8 +148,8 @@ test "add ** 256 = 0" {
 
 test "sub ** 256 = 0" {
     comptime const count: usize = 256;
-    const prog = []u8{'-'} ** count;
-    var mem = []u8{0} ** 1;
+    const prog = [_]u8{'-'} ** count;
+    var mem = [_]u8{0} ** 1;
 
     try bf(prog, &mem);
 
@@ -157,14 +157,14 @@ test "sub ** 256 = 0" {
 }
 
 test ">>>" {
-    var mem = []u8{0} ** 4;
+    var mem = [_]u8{0} ** 4;
     const src = ">>>+++";
     try bf(src, &mem);
     assert(mem[3] == 3);
 }
 
 test "<<<" {
-    var mem = []u8{0} ** 4;
+    var mem = [_]u8{0} ** 4;
     const src = ">>>>>><<<+++";
     try bf(src, &mem);
     assert(mem[3] == 3);
@@ -177,8 +177,8 @@ test "shift right" {
         count -= 1;
         std.debug.warn("{}.", count);
 
-        const prog = []u8{'>'} ** count ++ []u8{'+'} ** count;
-        var mem = []u8{0} ** 256;
+        const prog = [_]u8{'>'} ** count ++ [_]u8{'+'} ** count;
+        var mem = [_]u8{0} ** 256;
         try bf(prog, &mem);
 
         assert(mem[count] == count);
@@ -193,8 +193,8 @@ test "shift left" {
         count -= 1;
         std.debug.warn("{}.", count);
 
-        const prog = []u8{'>'} ** 256 ++ []u8{'<'} ** count ++ []u8{'+'} ** count;
-        var mem = []u8{0} ** 256;
+        const prog = [_]u8{'>'} ** 256 ++ [_]u8{'<'} ** count ++ [_]u8{'+'} ** count;
+        var mem = [_]u8{0} ** 256;
         try bf(prog, &mem);
 
         assert(mem[256 - count] == count);
@@ -203,7 +203,7 @@ test "shift left" {
 }
 
 test "reset [+]" {
-    var mem = []u8{128} ** 1;
+    var mem = [_]u8{128} ** 1;
     const prog = "[-]";
 
     try bf(prog, &mem);
@@ -212,7 +212,7 @@ test "reset [+]" {
 }
 
 test "reset [-]" {
-    var mem = []u8{128} ** 1;
+    var mem = [_]u8{128} ** 1;
     const prog = "[+]";
 
     try bf(prog, &mem);

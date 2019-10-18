@@ -20,7 +20,7 @@ pub fn main() anyerror!void {
               'q','Q' => { try out.write(buffer[0..(read_bytes - 1)]); try out.write("\n"); },
               '9' => {
                   var bottles: u8 = 99;
-                  var text_buffer: [16]u8 = "99 bottles" ++ []u8{0} ** 6;
+                  var text_buffer: [16]u8 = "99 bottles" ++ [_]u8{0} ** 6;
                   var text = text_buffer[0..10];
                   while(bottles > 0){
                       // If this program encounters pipe failure when printing to stdout, 
