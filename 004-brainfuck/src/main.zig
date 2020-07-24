@@ -59,6 +59,9 @@ test "jumpBackward" {
 }
 
 
+// TODO: for test: 
+//       add out_file and in_file as argument 
+//       add caching for jump destinations
 fn bf(prog: []const u8, mem: []u8) !void {
     const in_file = try io.getStdIn();
     const out_file = try io.getStdOut();
@@ -73,10 +76,10 @@ fn bf(prog: []const u8, mem: []u8) !void {
             '>' => mem_ptr += 1,
             '<' => mem_ptr -= 1,
             '.' => {
-                try out_file.write(mem[mem_ptr..mem_ptr]);
+                try out_file.write(mem[mem_ptr..mem_ptr]); // FIXME
             },
             ',' => {
-                _ = try in_file.read(mem[mem_ptr..mem_ptr]);
+                _ = try in_file.read(mem[mem_ptr..mem_ptr]); // FIXME
             },
             '[' => if (mem[mem_ptr] == 0) {
               prog_ptr = jumpForward(prog, prog_ptr);
@@ -92,8 +95,26 @@ fn bf(prog: []const u8, mem: []u8) !void {
 
 pub fn main() anyerror!void {
     std.debug.warn("Zig brainfuck interpreter.\n");
+    
+    var arena = std.heap.ArenaAllocator.init(std.heap.direct_allocator);
+    defer arena.deinit();
+    
+    const allocator = &arena.allocator;
+    
+    var args = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, args);
 
-    const prog = "+[,.]"; // cat
+    for (args) | arg, arg_i | {
+      std.debug.warn("{}: {}\n", arg_i, arg);
+    }
+    
+    const prog_path = args[1];
+    const prog = try std.io.readFileAlloc(allocator, prog_path);
+    std.debug.warn("{}\n", prog);
+    defer allocator.free(prog);
+    
+
+    // const prog = "+[,.]"; // cat
     var mem = [_]u8{0} ** 1024;
     try bf(prog, mem[0..]);
 }
@@ -219,3 +240,10 @@ test "reset [-]" {
 
     assert(mem[0] == 0);
 }
+
+test "hallo world" {
+  const prog = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+  var mem = [_]u8{0} ** 1024;
+  try bf(prog, &mem);
+}
+
