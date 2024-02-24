@@ -5,7 +5,7 @@ pub fn main() anyerror!void {
 
     // If this program is run without stdin or stdout attached, exit with an error.
     const stdin_file = std.io.getStdIn();
-    const out = std.io.getStdOut().outStream();
+    const out = std.io.getStdOut().writer();
 
     var buffer: [1000]u8 = undefined;
     var read_bytes = try stdin_file.read(buffer[0..]);
@@ -28,22 +28,22 @@ pub fn main() anyerror!void {
                     while (bottles > 0) {
                         // If this program encounters pipe failure when printing to stdout,
                         // exit with an error.
-                        try out.print("{} of beer on the wall, ", .{text});
-                        try out.print("{} of beer.\n", .{text});
+                        try out.print("{s} of beer on the wall, ", .{text});
+                        try out.print("{s} of beer.\n", .{text});
                         try out.writeAll("Take one down and pass it around, ");
 
                         bottles -= 1;
                         _ = switch (bottles) {
-                            0 => try std.fmt.bufPrint(text_buffer[0..], "{} bottles", .{"no more"}),
+                            0 => try std.fmt.bufPrint(text_buffer[0..], "{s} bottles", .{"no more"}),
                             1 => try std.fmt.bufPrint(text_buffer[0..], "{} bottle", .{bottles}),
                             else => try std.fmt.bufPrint(text_buffer[0..], "{} bottles", .{bottles}),
                         };
 
-                        try out.print("{} of beer on the wall.\n\n", .{text});
+                        try out.print("{s} of beer on the wall.\n\n", .{text});
                     }
 
-                    try out.print("{} bottles of beer on the wall, ", .{"No more"});
-                    try out.print("{} bottles of beer.\n", .{"no more"});
+                    try out.print("{s} bottles of beer on the wall, ", .{"No more"});
+                    try out.print("{s} bottles of beer.\n", .{"no more"});
                     try out.writeAll("Go to the store and buy some more, ");
                     try out.print("{} bottles of beer on the wall.\n\n", .{99});
                 },
