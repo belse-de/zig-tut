@@ -2,7 +2,7 @@ const std = @import("std");
 
 const io = std.io;
 
-const warn = std.debug.warn;
+const warn = std.log.warn;
 const assert = std.debug.assert;
 
 fn jumpForward(prog: []const u8, prog_ptr: usize) usize {
@@ -92,25 +92,26 @@ fn bf(prog: []const u8, mem: []u8) !void {
 }
 
 pub fn main() anyerror!void {
-    std.debug.warn("Zig brainfuck interpreter.\n", .{});
+    std.log.warn("Zig brainfuck interpreter.\n", .{});
 
     const allocator_impl = std.heap.page_allocator;
     var arena = std.heap.ArenaAllocator.init(allocator_impl);
     defer arena.deinit();
 
-    const allocator = &arena.allocator;
+    const allocator = arena.allocator();
 
     var args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
 
-    for (args) |arg, arg_i| {
-        std.debug.warn("{}: {}\n", .{ arg_i, arg });
+    for (args, 0..) |arg, arg_i| {
+        std.log.warn("{}: {s}\n", .{ arg_i, arg });
     }
-
+    
+    // TODO: add pramater validation
     const prog_path = args[1];
     const cwd = std.fs.cwd();
     const prog = try cwd.readFileAlloc(allocator, prog_path, 1024);
-    std.debug.warn("{}\n", .{prog});
+    std.log.warn("{s}\n", .{prog});
     defer allocator.free(prog);
 
     // const prog = "+[,.]"; // cat
@@ -125,11 +126,11 @@ test "all instructions once -> no crash" {
 }
 
 test "add" {
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
     comptime var count: usize = 256;
     inline while (count > 1) {
         count -= 1;
-        std.debug.warn("{}.", .{count});
+        std.log.warn("{}.", .{count});
 
         const prog = [_]u8{'+'} ** count;
         var mem = [_]u8{0} ** 1;
@@ -137,15 +138,15 @@ test "add" {
 
         assert(mem[0] == count);
     }
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
 }
 
 test "sub" {
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
     comptime var count: usize = 256;
     inline while (count > 1) {
         count -= 1;
-        std.debug.warn("{}.", .{count});
+        std.log.warn("{}.", .{count});
 
         const prog = [_]u8{'-'} ** count;
         var mem = [_]u8{0} ** 1;
@@ -153,11 +154,11 @@ test "sub" {
 
         assert(mem[0] == 256 - count);
     }
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
 }
 
 test "add ** 256 = 0" {
-    comptime const count: usize = 256;
+    const count: usize = 256;
     const prog = [_]u8{'+'} ** count;
     var mem = [_]u8{0} ** 1;
 
@@ -167,7 +168,7 @@ test "add ** 256 = 0" {
 }
 
 test "sub ** 256 = 0" {
-    comptime const count: usize = 256;
+    const count: usize = 256;
     const prog = [_]u8{'-'} ** count;
     var mem = [_]u8{0} ** 1;
 
@@ -191,11 +192,11 @@ test "<<<" {
 }
 
 test "shift right" {
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
     comptime var count: usize = 256;
     inline while (count > 1) {
         count -= 1;
-        std.debug.warn("{}.", .{count});
+        std.log.warn("{}.", .{count});
 
         const prog = [_]u8{'>'} ** count ++ [_]u8{'+'} ** count;
         var mem = [_]u8{0} ** 256;
@@ -203,15 +204,15 @@ test "shift right" {
 
         assert(mem[count] == count);
     }
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
 }
 
 test "shift left" {
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
     comptime var count: usize = 256;
     inline while (count > 1) {
         count -= 1;
-        std.debug.warn("{}.", .{count});
+        std.log.warn("{}.", .{count});
 
         const prog = [_]u8{'>'} ** 256 ++ [_]u8{'<'} ** count ++ [_]u8{'+'} ** count;
         var mem = [_]u8{0} ** 256;
@@ -219,7 +220,7 @@ test "shift left" {
 
         assert(mem[256 - count] == count);
     }
-    std.debug.warn("\n", .{});
+    std.log.warn("\n", .{});
 }
 
 test "reset [+]" {
